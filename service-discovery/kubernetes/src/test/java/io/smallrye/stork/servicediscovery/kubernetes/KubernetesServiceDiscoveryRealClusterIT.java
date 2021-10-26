@@ -9,8 +9,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.Config;
 import io.smallrye.stork.Service;
 import io.smallrye.stork.ServiceInstance;
@@ -26,7 +27,9 @@ public class KubernetesServiceDiscoveryRealClusterIT {
         System.setProperty(Config.KUBERNETES_TRUST_CERT_SYSTEM_PROPERTY, "true");
     }
 
-    void shouldGetServiceFromK8sDefaultNamespace() throws InterruptedException {
+    @Test
+    @Disabled
+    void shouldGetServiceFromK8sDefaultNamespace() {
 
         TestConfigProvider.addServiceConfig("demo", null, "kubernetes",
                 null, null);

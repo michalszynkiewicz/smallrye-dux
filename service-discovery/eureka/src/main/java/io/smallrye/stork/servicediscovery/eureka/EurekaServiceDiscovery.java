@@ -17,6 +17,7 @@ import io.smallrye.stork.DefaultServiceInstance;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
 import io.smallrye.stork.spi.ServiceInstanceIds;
+import io.smallrye.stork.spi.ServiceInstanceUtils;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
@@ -64,7 +65,7 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
     }
 
     @Override
-    public Uni<List<ServiceInstance>> fetchNewServiceInstances() {
+    public Uni<List<ServiceInstance>> fetchNewServiceInstances(List<ServiceInstance> previousInstances) {
         Uni<HttpResponse<Buffer>> retrieval = client.get(path)
                 .putHeader("Accept", "application/json;charset=UTF-8").send();
 
@@ -73,7 +74,7 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
                 .map(this::selectAliveInstances)
                 .map(this::selectSecureInstancesIfEnabled)
                 .map(this::selectChosenInstanceIfEnabled)
-                .map(this::toStorkServiceInstance);
+                .map(appInstances -> toStorkServiceInstances(appInstances, previousInstances));
     }
 
     private Stream<ApplicationInstance> selectSecureInstancesIfEnabled(Stream<ApplicationInstance> stream) {
@@ -92,7 +93,8 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
         }
     }
 
-    private List<ServiceInstance> toStorkServiceInstance(Stream<ApplicationInstance> instances) {
+    private List<ServiceInstance> toStorkServiceInstances(Stream<ApplicationInstance> instances,
+            List<ServiceInstance> previousInstances) {
         return instances
                 .map(instance -> {
                     String virtualAddress;
@@ -109,7 +111,9 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
                         port = instance.port.port;
                     }
 
-                    return new DefaultServiceInstance(ServiceInstanceIds.next(), virtualAddress, port);
+                    ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, virtualAddress, port);
+                    return matching == null ? new DefaultServiceInstance(ServiceInstanceIds.next(), virtualAddress, port)
+                            : matching;
                 })
                 .collect(Collectors.toList());
     }

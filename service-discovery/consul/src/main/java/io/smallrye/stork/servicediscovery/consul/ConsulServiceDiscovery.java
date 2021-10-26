@@ -13,6 +13,7 @@ import io.smallrye.stork.DefaultServiceInstance;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
 import io.smallrye.stork.spi.ServiceInstanceIds;
+import io.smallrye.stork.spi.ServiceInstanceUtils;
 import io.vertx.core.Vertx;
 import io.vertx.ext.consul.ConsulClient;
 import io.vertx.ext.consul.ConsulClientOptions;
@@ -55,7 +56,7 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
     }
 
     @Override
-    public Uni<List<ServiceInstance>> fetchNewServiceInstances() {
+    public Uni<List<ServiceInstance>> fetchNewServiceInstances(List<ServiceInstance> previousInstances) {
         Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
                 emitter -> client.healthServiceNodes(serviceName, passing)
                         .onComplete(result -> {
@@ -65,19 +66,30 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
                                 emitter.complete(result.result());
                             }
                         }));
-        return serviceEntryList.onItem().transform(this::map); // TODO: logging
+        return serviceEntryList.onItem().transform(newInstances -> toStorkServiceInstances(newInstances, previousInstances));
     }
 
-    private List<ServiceInstance> map(ServiceEntryList serviceEntryList) {
+    private List<ServiceInstance> toStorkServiceInstances(ServiceEntryList serviceEntryList,
+                                                          List<ServiceInstance> previousInstances) {
         List<ServiceEntry> list = serviceEntryList.getList();
         List<ServiceInstance> serviceInstances = new ArrayList<>();
+
         for (ServiceEntry serviceEntry : list) {
-            // TODO: reuse service instance IDs on refresh (so that they don't change)
-            ServiceInstance serviceInstance = new DefaultServiceInstance(ServiceInstanceIds.next(),
-                    serviceEntry.getService().getAddress(), serviceEntry.getService().getPort());
-            serviceInstances.add(serviceInstance);
+            String address = serviceEntry.getService().getAddress();
+            int port = serviceEntry.getService().getPort();
+            if (address == null) {
+                throw new IllegalArgumentException("Got null address for service " + serviceName);
+            }
+
+            ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, address, port);
+            if (matching != null) {
+                serviceInstances.add(matching);
+            } else {
+                ServiceInstance serviceInstance = new DefaultServiceInstance(ServiceInstanceIds.next(),
+                        address, port);
+                serviceInstances.add(serviceInstance);
+            }
         }
         return serviceInstances;
     }
-
 }

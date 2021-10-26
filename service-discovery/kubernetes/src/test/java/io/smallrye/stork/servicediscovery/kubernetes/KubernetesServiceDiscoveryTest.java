@@ -6,11 +6,13 @@ import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +41,7 @@ public class KubernetesServiceDiscoveryTest {
     }
 
     @Test
-    void shouldGetServiceFromK8sDefaultNamespace() throws InterruptedException {
+    void shouldGetServiceFromK8sDefaultNamespace() {
 
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
                 null, Map.of("k8s-host", k8sMasterUrl));
@@ -66,7 +68,7 @@ public class KubernetesServiceDiscoveryTest {
     }
 
     @Test
-    void shouldGetServiceFromK8sNamespace() throws InterruptedException {
+    void shouldGetServiceFromK8sNamespace() {
 
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
                 null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "ns1"));
@@ -93,7 +95,7 @@ public class KubernetesServiceDiscoveryTest {
     }
 
     @Test
-    void shouldGetServiceFromK8sAllNamespace() throws InterruptedException {
+    void shouldGetServiceFromK8sAllNamespace() {
 
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
                 null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "all"));
@@ -120,7 +122,7 @@ public class KubernetesServiceDiscoveryTest {
     }
 
     @Test
-    void shouldNotFetchWhenRefreshPeriodNotReached() throws InterruptedException {
+    void shouldNotFetchWhenRefreshPeriodNotReached() {
         //Given a service `my-service` registered in k8s and a refresh-period of 5 minutes
         // 1- services instance are gathered form k8s
         // 2- we remove the service
@@ -200,24 +202,93 @@ public class KubernetesServiceDiscoveryTest {
                 .subscribe().with(instances::set);
 
         await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get().isEmpty());
+    }
+
+    @Test
+    void shouldPreserveIdsOnRefetch() throws InterruptedException {
+
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
+                null, Map.of("k8s-host", k8sMasterUrl, "refresh-period", "3"));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        String serviceName = "svc";
+
+        setUpKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
                 .until(() -> instances.get() != null);
 
-        assertThat(instances.get()).isEmpty();
+        assertThat(instances.get()).hasSize(3);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
+                "10.96.96.232", "10.96.96.233");
 
+        Map<String, Long> idsByHostname = mapHostnameToIds(instances.get());
+
+        client.endpoints().withName(serviceName).delete();
+        setUpKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232");
+
+        Thread.sleep(5000);
+
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(instances::get, Matchers.hasSize(2));
+
+        for (ServiceInstance serviceInstance : instances.get()) {
+            assertThat(idsByHostname.get(serviceInstance.getHost())).isEqualTo(serviceInstance.getId());
+        }
+
+        client.endpoints().withName(serviceName).delete();
+        setUpKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232", "10.96.96.234");
+
+        Thread.sleep(5000);
+
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(instances::get, Matchers.hasSize(3));
+
+        for (ServiceInstance serviceInstance : instances.get()) {
+            if (serviceInstance.getHost().equals("10.96.96.234")) {
+                assertThat(idsByHostname.containsValue(serviceInstance.getId())).isFalse();
+            } else {
+                assertThat(idsByHostname.get(serviceInstance.getHost())).isEqualTo(serviceInstance.getId());
+            }
+        }
+    }
+
+    private Map<String, Long> mapHostnameToIds(List<ServiceInstance> serviceInstances) {
+        Map<String, Long> result = new HashMap<>();
+        for (ServiceInstance serviceInstance : serviceInstances) {
+            result.put(serviceInstance.getHost(), serviceInstance.getId());
+        }
+        return result;
     }
 
     private void setUpKubernetesService(String serviceName, String namespace, String... ipAdresses) {
-        List<EndpointAddress> endpoints = Arrays.stream(ipAdresses)
+        List<EndpointAddress> endpointAddresses = Arrays.stream(ipAdresses)
                 .map(ipAdress -> new EndpointAddressBuilder().withIp(ipAdress).build()).collect(Collectors.toList());
         Endpoints endpoint = new EndpointsBuilder()
                 .withNewMetadata().withName(serviceName).endMetadata()
-                .addToSubsets(new EndpointSubsetBuilder().withAddresses(endpoints)
+                .addToSubsets(new EndpointSubsetBuilder().withAddresses(endpointAddresses)
                         .addToPorts(new EndpointPortBuilder().withPort(8080).build())
                         .build())
                 .build();
 
         client.endpoints().inNamespace(namespace).withName(serviceName).create(endpoint);
-
     }
 
 }

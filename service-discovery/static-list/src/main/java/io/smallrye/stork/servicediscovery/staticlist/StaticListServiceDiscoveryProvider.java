@@ -32,7 +32,7 @@ public class StaticListServiceDiscoveryProvider implements ServiceDiscoveryProvi
         parameters.keySet().stream()
                 .filter(k -> number.matcher(k).matches())
                 .sorted(Comparator.comparing(Integer::valueOf))
-                .forEach(k -> {//
+                .forEach(k -> {
                     URL url = null;
                     try {
                         String address = parameters.get(k);

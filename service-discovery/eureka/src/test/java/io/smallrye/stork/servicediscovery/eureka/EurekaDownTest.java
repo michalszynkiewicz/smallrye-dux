@@ -54,6 +54,6 @@ public class EurekaDownTest {
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
         assertThatThrownBy(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)))
-                .hasMessageContaining("Connection refused");
+                .hasMessageContaining("ConnectException");
     }
 }

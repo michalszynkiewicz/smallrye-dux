@@ -3,7 +3,6 @@ package io.smallrye.stork.servicediscovery.kubernetes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +18,7 @@ import io.smallrye.stork.DefaultServiceInstance;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
 import io.smallrye.stork.spi.ServiceInstanceIds;
+import io.smallrye.stork.spi.ServiceInstanceUtils;
 import io.vertx.core.Vertx;
 
 public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
@@ -52,7 +52,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
     }
 
     @Override
-    public Uni<List<ServiceInstance>> fetchNewServiceInstances() {
+    public Uni<List<ServiceInstance>> fetchNewServiceInstances(List<ServiceInstance> previousInstances) {
         Uni<List<Endpoints>> endpointsUni = Uni.createFrom().emitter(
                 emitter -> {
                     vertx.executeBlocking(future -> {
@@ -68,6 +68,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                         future.complete(endpoints);
                     }, result -> {
                         if (result.succeeded()) {
+                            @SuppressWarnings("unchecked")
                             List<Endpoints> endpoints = (List<Endpoints>) result.result();
                             emitter.complete(endpoints);
                         } else {
@@ -76,15 +77,14 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                         }
                     });
                 });
-        return endpointsUni.onItem().transform(this::map);
-
+        return endpointsUni.onItem().transform(endpoints -> toStorkServiceInstances(endpoints, previousInstances));
     }
 
-    private List<ServiceInstance> map(List<Endpoints> endpointList) {
+    private List<ServiceInstance> toStorkServiceInstances(List<Endpoints> endpointList, List<ServiceInstance> previousInstances) {
         List<ServiceInstance> serviceInstances = new ArrayList<>();
         for (Endpoints endPoints : endpointList) {
             for (EndpointSubset subset : endPoints.getSubsets()) {
-                serviceInstances.addAll(subset.getAddresses().stream().map(endpointAddress -> {
+                for (EndpointAddress endpointAddress : subset.getAddresses()) {
                     String hostname = endpointAddress.getIp();
                     if (hostname == null) { // should we take the hostName?
                         hostname = endpointAddress.getHostname();
@@ -94,9 +94,15 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                     if (endpointPorts.size() == 1) {
                         port = endpointPorts.get(0).getPort();
                     }
-                    return new DefaultServiceInstance(ServiceInstanceIds.next(),
-                            hostname, port);
-                }).collect(Collectors.toList()));
+
+                    ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, hostname, port);
+
+                    if (matching != null) {
+                        serviceInstances.add(matching);
+                    } else {
+                        serviceInstances.add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port));
+                    }
+                }
             }
         }
 
