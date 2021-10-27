@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -13,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
 import io.smallrye.stork.utils.DurationUtils;
 
@@ -97,21 +97,22 @@ public abstract class CachingServiceDiscovery implements ServiceDiscovery {
     public abstract Uni<List<ServiceInstance>> fetchNewServiceInstances(List<ServiceInstance> previousInstances);
 
     public static class Refresh {
+        final Uni<List<ServiceInstance>> result;
+        UniEmitter<? super List<ServiceInstance>> emitter;
 
-        final CompletableFuture<List<ServiceInstance>> result = new CompletableFuture<>();
-        final Uni<List<ServiceInstance>> uniResult = Uni.createFrom().completionStage(result).memoize().indefinitely();
+        Refresh() {
+            result = Uni.createFrom().<List<ServiceInstance>> emitter(emitter -> this.emitter = emitter)
+                    .memoize().indefinitely();
+            result.subscribe().with(val -> {});
+        }
 
         protected void trigger(Supplier<Uni<List<ServiceInstance>>> supplier) {
-            try {
-                Uni<List<ServiceInstance>> instances = supplier.get();
-                instances.subscribe().with(result::complete, result::completeExceptionally);
-            } catch (Throwable any) {
-                result.completeExceptionally(any);
-            }
+            Uni<List<ServiceInstance>> instances = supplier.get();
+            instances.subscribe().with(result -> emitter.complete(result), failure -> emitter.fail(failure));
         }
 
         public Uni<List<ServiceInstance>> result() {
-            return uniResult;
+            return result;
         }
     }
 }
