@@ -1,0 +1,5 @@
+ | Attribute            | Mandatory  | Default Value      | Description  |
+ |----------------------|------------|--------------------|--------------|
+| `host` | Yes |  | Host name of the service discovery server. |
+| `port` | No |  | Hort of the service discovery server. |
+| `secure` | No | `false` | Whether the communication should use a secure connection (e.g. HTTPS) |

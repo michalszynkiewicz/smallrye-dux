@@ -1,0 +1,3 @@
+ | Attribute            | Mandatory  | Default Value      | Description  |
+ |----------------------|------------|--------------------|--------------|
+| `some-prop` | No |  | no description |

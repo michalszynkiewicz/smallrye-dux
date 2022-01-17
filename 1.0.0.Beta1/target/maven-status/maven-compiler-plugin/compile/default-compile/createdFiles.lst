@@ -1,0 +1,17 @@
+examples/StorkServiceExample.class
+examples/AcmeServiceDiscoveryProvider.class
+examples/HelloClient.class
+examples/AcmeServiceDiscoveryProviderConfiguration.class
+examples/StorkServiceSelectionExample.class
+examples/StorkEntryPointExample.class
+META-INF/services/io.smallrye.stork.spi.internal.ServiceDiscoveryLoader
+META-INF/stork-docs/acme-lb-attributes.txt
+examples/AcmeServiceDiscovery.class
+META-INF/stork-docs/acme-sd-attributes.txt
+META-INF/services/io.smallrye.stork.spi.internal.LoadBalancerLoader
+examples/AcmeLoadBalancer.class
+examples/AcmeLoadBalancerProvider.class
+examples/StorkServiceLookupExample.class
+examples/AcmeServiceDiscoveryProviderLoader.class
+examples/AcmeLoadBalancerProviderConfiguration.class
+examples/AcmeLoadBalancerProviderLoader.class

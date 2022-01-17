@@ -1,0 +1,7 @@
+ | Attribute            | Mandatory  | Default Value      | Description  |
+ |----------------------|------------|--------------------|--------------|
+| `k8s-host` | No |  | The Kubernetes API host. |
+| `k8s-namespace` | No |  | The namespace of the service. Use all to discover all namespaces. |
+| `application` | No |  | The Eureka application Id; if not defined Stork service name will be used. |
+| `refresh-period` | No | `5M` | Service discovery cache refresh period. |
+| `secure` | No | `false` | Whether the communication should use a secure connection (e.g. HTTPS) |

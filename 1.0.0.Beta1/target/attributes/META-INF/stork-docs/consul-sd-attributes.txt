@@ -1,0 +1,8 @@
+ | Attribute            | Mandatory  | Default Value      | Description  |
+ |----------------------|------------|--------------------|--------------|
+| `consul-host` | No | `localhost` | The Consul host. |
+| `consul-port` | No | `8500` | The Consul port. |
+| `use-health-checks` | No | `true` | Whether to use health check. |
+| `application` | No |  | The application name; if not defined Stork service name will be used. |
+| `refresh-period` | No | `5M` | Service discovery cache refresh period. |
+| `secure` | No | `false` | Whether the communication should use a secure connection (e.g. HTTPS) |

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_11">
+    <output url="file://$MODULE_DIR$/target/classes" />
+    <output-test url="file://$MODULE_DIR$/target/test-classes" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/snippets" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/generated-sources/annotations" isTestSource="false" generated="true" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="smallrye-stork-core" />
+    <orderEntry type="module" module-name="smallrye-stork-api" />
+    <orderEntry type="library" name="Maven: io.smallrye.reactive:mutiny:1.3.0" level="project" />
+    <orderEntry type="library" name="Maven: org.reactivestreams:reactive-streams:1.0.3" level="project" />
+    <orderEntry type="library" name="Maven: io.smallrye.common:smallrye-common-annotation:1.8.0" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.33" level="project" />
+    <orderEntry type="module" module-name="smallrye-stork-configuration-generator" scope="PROVIDED" />
+    <orderEntry type="module" module-name="smallrye-stork-test-utils" scope="TEST" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.assertj:assertj-core:3.22.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.slf4j:slf4j-simple:1.7.33" level="project" />
+    <orderEntry type="module" module-name="smallrye-dux-service-discovery-static-list" scope="TEST" />
+    <orderEntry type="library" name="Maven: org.eclipse.microprofile.rest.client:microprofile-rest-client-api:2.0" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.ws.rs:jakarta.ws.rs-api:2.1.6" level="project" />
+    <orderEntry type="module" module-name="smallrye-stork-service-discovery-combined" />
+    <orderEntry type="module" module-name="smallrye-stork-service-discovery-consul" />
+    <orderEntry type="library" name="Maven: io.vertx:vertx-consul-client:4.2.2" level="project" />
+    <orderEntry type="library" name="Maven: io.vertx:vertx-web-client:4.2.2" level="project" />
+    <orderEntry type="library" name="Maven: io.vertx:vertx-web-common:4.2.2" level="project" />
+    <orderEntry type="library" name="Maven: io.vertx:vertx-auth-common:4.2.2" level="project" />
+    <orderEntry type="module" module-name="smallrye-stork-service-discovery-eureka" />
+    <orderEntry type="library" name="Maven: io.smallrye.reactive:smallrye-mutiny-vertx-web-client:2.18.0" level="project" />
+    <orderEntry type="library" name="Maven: io.smallrye.reactive:smallrye-mutiny-vertx-core:2.18.0" level="project" />
+    <orderEntry type="library" name="Maven: io.smallrye.reactive:smallrye-mutiny-vertx-runtime:2.18.0" level="project" />
+    <orderEntry type="library" name="Maven: io.smallrye.reactive:vertx-mutiny-generator:2.18.0" level="project" />
+    <orderEntry type="library" name="Maven: io.vertx:vertx-codegen:4.2.3" level="project" />
+    <orderEntry type="library" name="Maven: io.smallrye.reactive:smallrye-mutiny-vertx-auth-common:2.18.0" level="project" />
+    <orderEntry type="library" name="Maven: io.smallrye.reactive:smallrye-mutiny-vertx-web-common:2.18.0" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.13.1" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.13.1" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.13.1" level="project" />
+    <orderEntry type="module" module-name="smallrye-stork-service-discovery-kubernetes" scope="PROVIDED" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-client:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-core:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-common:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-rbac:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-admissionregistration:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-apps:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-autoscaling:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-apiextensions:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-batch:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-certificates:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-coordination:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-discovery:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-events:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-extensions:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-flowcontrol:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-networking:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-metrics:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-policy:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-scheduling:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-storageclass:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:kubernetes-model-node:5.11.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.squareup.okhttp3:okhttp:3.12.12" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.squareup.okio:okio:1.15.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.squareup.okhttp3:logging-interceptor:3.12.12" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.yaml:snakeyaml:1.28" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: io.fabric8:zjsonpatch:0.3.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.mifmif:generex:1.0.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: dk.brics.automaton:automaton:1.11-8" level="project" />
+    <orderEntry type="library" name="Maven: io.vertx:vertx-core:4.2.2" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-common:4.1.72.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-buffer:4.1.72.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-transport:4.1.72.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-handler:4.1.72.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-codec:4.1.72.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-tcnative-classes:2.0.46.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-handler-proxy:4.1.72.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-codec-socks:4.1.72.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-codec-http:4.1.72.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-codec-http2:4.1.72.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-resolver:4.1.72.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-resolver-dns:4.1.72.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-codec-dns:4.1.72.Final" level="project" />
+  </component>
+</module>

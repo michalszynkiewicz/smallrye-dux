@@ -1,0 +1,4 @@
+ | Attribute            | Mandatory  | Default Value      | Description  |
+ |----------------------|------------|--------------------|--------------|
+| `three` | No |  | none |
+| `secure` | No | `false` | Whether the communication should use a secure connection (e.g. HTTPS) |

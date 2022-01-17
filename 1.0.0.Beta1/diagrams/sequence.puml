@@ -1,0 +1,47 @@
+@startuml
+skinparam participant {
+    BackgroundColor AliceBlue
+    ArrowColor DarkGrey
+    BorderColor DarkGrey
+}
+
+skinparam roundcorner 20
+
+skinparam sequence {
+    ArrowColor DarkGrey
+    ActorBorderColor DarkGrey
+    LifeLineBorderColor DarkGrey
+    LifeLineBackgroundColor #A9DCDF
+
+}
+skinparam sequenceMessageAlign center
+autonumber "<b>(0)"
+
+
+participant Application
+participant Stork
+participant ConfigProvider
+participant Service
+participant "Service Discovery"
+participant "Load Balancer"
+
+Application -> Stork : initialize()
+Stork -> ConfigProvider : getConfig()
+ConfigProvider -> Stork : : List<ServiceConfig>
+
+... ...
+
+Application -> Stork : getService("name")
+Stork -> Application: Service
+
+...  ...
+
+
+Application -> Service : selectServiceInstance()
+Service -> "Service Discovery" : getServiceInstances()
+"Service Discovery" ---> Service : Uni<List<ServiceInstance>>
+Service -> "Load Balancer" : selectServiceInstance()
+"Load Balancer" ---> Service : Uni<ServiceInstance>
+Service ---> Application : Uni<ServiceInstance>
+
+@enduml

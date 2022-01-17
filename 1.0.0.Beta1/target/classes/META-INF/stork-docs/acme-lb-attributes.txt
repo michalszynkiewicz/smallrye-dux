@@ -1,0 +1,3 @@
+ | Attribute            | Mandatory  | Default Value      | Description  |
+ |----------------------|------------|--------------------|--------------|
+| `my-attribute` | No |  | Attribute that alters the behavior of the LoadBalancer |

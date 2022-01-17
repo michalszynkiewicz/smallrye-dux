@@ -1,0 +1,11 @@
+ | Attribute            | Mandatory  | Default Value      | Description  |
+ |----------------------|------------|--------------------|--------------|
+| `eureka-host` | Yes |  | The Eureka server host. |
+| `eureka-port` | No | `8761` | The Eureka server port. |
+| `eureka-context-path` | No | `/` | The Eureka server root context path. |
+| `application` | No |  | The Eureka application Id; if not defined Stork service name will be used |
+| `eureka-trust-all` | No | `false` | Enable/Disable the TLS certificate verification |
+| `eureka-tls` | No | `false` | Use TLS to connect to the Eureka server |
+| `instance` | No |  | The Eureka application instance Id |
+| `refresh-period` | No | `5M` | Service discovery cache refresh period. |
+| `secure` | No | `false` | Whether the communication should use a secure connection (e.g. HTTPS) |
