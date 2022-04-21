@@ -18,16 +18,19 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 
 import io.smallrye.stork.api.LoadBalancer;
+import io.smallrye.stork.api.MetadataKey;
 import io.smallrye.stork.api.ServiceDiscovery;
+import io.smallrye.stork.api.ServiceRegistrar;
+import io.smallrye.stork.api.config.ConfigWithType;
 import io.smallrye.stork.api.config.Constants;
 import io.smallrye.stork.api.config.LoadBalancerAttribute;
-import io.smallrye.stork.api.config.LoadBalancerConfig;
 import io.smallrye.stork.api.config.ServiceConfig;
 import io.smallrye.stork.api.config.ServiceDiscoveryAttribute;
-import io.smallrye.stork.api.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.api.config.ServiceRegistrarAttribute;
 import io.smallrye.stork.spi.StorkInfrastructure;
 import io.smallrye.stork.spi.internal.LoadBalancerLoader;
 import io.smallrye.stork.spi.internal.ServiceDiscoveryLoader;
+import io.smallrye.stork.spi.internal.ServiceRegistrarLoader;
 
 public class ConfigClassWriter {
     private static final String SERVICES_DIR = "META-INF/services/";
@@ -41,15 +44,21 @@ public class ConfigClassWriter {
     }
 
     public String createConfig(Element element, String type, LoadBalancerAttribute[] attributes) throws IOException {
-        return createConfig(element, true, type,
+        return createConfig(element, type, "",
                 format(" Configuration for the {@code %s} LoadBalancer.", element.getSimpleName()),
                 (out, cn) -> writeLoadBalancerAttributes(cn, attributes, out));
     }
 
     public String createConfig(Element element, String type, ServiceDiscoveryAttribute[] attributes) throws IOException {
-        return createConfig(element, false, type,
+        return createConfig(element, type, "",
                 format(" Configuration for the {@code %s} ServiceDiscovery.", element.getSimpleName()),
                 (out, cn) -> writeServiceDiscoveryAttributes(cn, attributes, out));
+    }
+
+    public String createConfig(Element element, String type, ServiceRegistrarAttribute[] attributes) throws IOException {
+        return createConfig(element, type, "Registrar",
+                format(" Configuration for the {@code %s} ServiceRegistrar.", element.getSimpleName()),
+                (out, cn) -> writeServiceRegistrarAttributes(cn, attributes, out));
     }
 
     public String createLoadBalancerLoader(Element element, String configClassName, String type) throws IOException {
@@ -66,7 +75,7 @@ public class ConfigClassWriter {
             writeImportStatement(configClassName, out);
             writeImportStatement(providerClassName, out);
             writeImportStatement(LoadBalancer.class, out);
-            writeImportStatement(LoadBalancerConfig.class, out);
+            writeImportStatement(ConfigWithType.class, out);
             writeImportStatement(ServiceDiscovery.class, out);
             writeClassDeclaration(format("%s implements %s", simpleClassName, LoadBalancerLoader.class.getName()),
                     "LoadBalancerLoader for " + providerClassName, out);
@@ -74,7 +83,7 @@ public class ConfigClassWriter {
             out.println(format("   private final %s provider = new %s();", providerClassName, providerClassName));
             out.println("   @Override");
             out.println(
-                    "   public LoadBalancer createLoadBalancer(LoadBalancerConfig config, ServiceDiscovery serviceDiscovery) {");
+                    "   public LoadBalancer createLoadBalancer(ConfigWithType config, ServiceDiscovery serviceDiscovery) {");
             out.println(format("      %s typedConfig = new %s(config.parameters());", configClassName, configClassName));
             out.println("      return provider.createLoadBalancer(typedConfig, serviceDiscovery);");
             out.println("   }");
@@ -100,7 +109,7 @@ public class ConfigClassWriter {
             writeImportStatement(configClassName, out);
             writeImportStatement(providerClassName, out);
             writeImportStatement(ServiceDiscovery.class, out);
-            writeImportStatement(ServiceDiscoveryConfig.class, out);
+            writeImportStatement(ConfigWithType.class, out);
             writeImportStatement(ServiceConfig.class, out);
             writeImportStatement(StorkInfrastructure.class, out);
 
@@ -109,11 +118,58 @@ public class ConfigClassWriter {
 
             out.println(format("   private final %s provider = new %s();", providerClassName, providerClassName));
             out.println("   @Override");
-            out.println("   public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,");
+            out.println("   public ServiceDiscovery createServiceDiscovery(ConfigWithType config, String serviceName,");
             out.println("              ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {");
             out.println(format("      %s typedConfig = new %s(config.parameters());", configClassName, configClassName));
             out.println(
                     "      return provider.createServiceDiscovery(typedConfig, serviceName, serviceConfig, storkInfrastructure);");
+            out.println("   }");
+
+            writeTypeMethod(type, out);
+
+            out.println("}");
+        }
+        return className;
+    }
+
+    public String createServiceRegistrarLoader(Element element, String metadataKey,
+            String configClassName, String type) throws IOException {
+        String registrarProviderClass = element.toString();
+        String className = registrarProviderClass + "Loader";
+        String classPackage = getPackage(element);
+        String simpleClassName = element.getSimpleName() + "Loader";
+
+        String metadataKeyName = metadataKey.substring(metadataKey.lastIndexOf('.') + 1); // mstodo metadataKey.getSimpleName();
+
+        // mstodo get metadata type
+
+        JavaFileObject javaFile = environment.getFiler().createSourceFile(className);
+        javaFile.delete();
+
+        try (PrintWriter out = new PrintWriter(javaFile.openWriter())) {
+            writePackageDeclaration(classPackage, out);
+            writeImportStatement(configClassName, out);
+            writeImportStatement(registrarProviderClass, out);
+            writeImportStatement(ConfigWithType.class, out);
+            writeImportStatement(ServiceRegistrar.class, out);
+            writeImportStatement(StorkInfrastructure.class, out);
+            writeImportStatement(metadataKey, out);
+
+            writeImportStatement(MetadataKey.class, out);
+
+            writeClassDeclaration(
+                    format("%s implements %s<%s>", simpleClassName, ServiceRegistrarLoader.class.getName(), metadataKeyName),
+                    "ServiceRegistrarLoader for {@link " + registrarProviderClass + "}", out);
+
+            out.println(format("   private final %s provider = new %s();", registrarProviderClass, registrarProviderClass));
+            out.println("   @Override");
+            out.println(format(
+                    "   public ServiceRegistrar<%s> createServiceRegistrar(ConfigWithType config, String serviceRegistrarName,",
+                    metadataKeyName));
+            out.println("              StorkInfrastructure storkInfrastructure) {");
+            out.println(format("      %s typedConfig = new %s(config.parameters());", configClassName, configClassName));
+            out.println(
+                    "      return provider.createServiceRegistrar(typedConfig, serviceRegistrarName, storkInfrastructure);");
             out.println("   }");
 
             writeTypeMethod(type, out);
@@ -130,18 +186,25 @@ public class ConfigClassWriter {
         }
     }
 
+    private void writeServiceRegistrarAttributes(String simpleClassName, ServiceRegistrarAttribute[] attributes,
+            PrintWriter out) {
+        for (ServiceRegistrarAttribute attribute : attributes) {
+            writeAttribute(out, simpleClassName, attribute.name(), attribute.description(), attribute.defaultValue());
+        }
+    }
+
     private void writeLoadBalancerAttributes(String simpleClassName, LoadBalancerAttribute[] attributes, PrintWriter out) {
         for (LoadBalancerAttribute attribute : attributes) {
             writeAttribute(out, simpleClassName, attribute.name(), attribute.description(), attribute.defaultValue());
         }
     }
 
-    public String createConfig(Element element, boolean isLoadBalancer, String type, String comment,
+    public String createConfig(Element element, String type, String suffix, String comment,
             BiConsumer<PrintWriter, String> attributesWriter)
             throws IOException {
         String sanitized = toCamelCase(type);
         String classPackage = getPackage(element);
-        String simpleClassName = sanitized + "Configuration";
+        String simpleClassName = sanitized + suffix + "Configuration";
         String className = classPackage + "." + simpleClassName;
 
         JavaFileObject file = environment.getFiler().createSourceFile(className);
@@ -151,13 +214,9 @@ public class ConfigClassWriter {
             writeImportStatement(Collections.class, out);
             writeImportStatement(HashMap.class, out);
             writeImportStatement(Map.class, out);
-            if (isLoadBalancer) {
-                writeImportStatement(LoadBalancerConfig.class, out);
-            } else {
-                writeImportStatement(ServiceDiscoveryConfig.class, out);
-            }
+            writeImportStatement(ConfigWithType.class, out);
 
-            writeClassDeclaration(simpleClassName, isLoadBalancer, comment, out);
+            writeConfigClassDeclaration(simpleClassName, comment, out);
 
             writeConfigMapRelatedStuff(simpleClassName, out);
             out.println();
@@ -290,13 +349,12 @@ public class ConfigClassWriter {
         }
     }
 
-    private void writeClassDeclaration(String simpleName, boolean isLoadBalancer, String comment, PrintWriter out) {
+    private void writeConfigClassDeclaration(String simpleName, String comment, PrintWriter out) {
         out.println();
         out.println("/**");
         out.println(" * " + comment);
         out.println(" */");
-        out.println(format(" public class %s implements %s{", simpleName,
-                isLoadBalancer ? LoadBalancerConfig.class.getName() : ServiceDiscoveryConfig.class.getName()));
+        out.println(format(" public class %s implements %s{", simpleName, ConfigWithType.class.getName()));
     }
 
     private void writeClassDeclaration(String simpleName, String comment, PrintWriter out) {

@@ -1,8 +1,8 @@
 package io.smallrye.stork.spi.internal;
 
 import io.smallrye.stork.api.ServiceDiscovery;
+import io.smallrye.stork.api.config.ConfigWithType;
 import io.smallrye.stork.api.config.ServiceConfig;
-import io.smallrye.stork.api.config.ServiceDiscoveryConfig;
 import io.smallrye.stork.spi.ElementWithType;
 import io.smallrye.stork.spi.StorkInfrastructure;
 
@@ -20,6 +20,6 @@ public interface ServiceDiscoveryLoader extends ElementWithType {
      * @param storkInfrastructure the stork infrastructure, must not be {@code null}
      * @return the new {@link ServiceDiscovery}
      */
-    ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
+    ServiceDiscovery createServiceDiscovery(ConfigWithType config, String serviceName,
             ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure);
 }

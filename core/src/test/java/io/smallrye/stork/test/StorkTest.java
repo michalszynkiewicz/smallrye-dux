@@ -18,9 +18,8 @@ import io.smallrye.stork.Stork;
 import io.smallrye.stork.api.NoSuchServiceDefinitionException;
 import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.api.ServiceInstance;
-import io.smallrye.stork.api.config.LoadBalancerConfig;
+import io.smallrye.stork.api.config.ConfigWithType;
 import io.smallrye.stork.api.config.ServiceConfig;
-import io.smallrye.stork.api.config.ServiceDiscoveryConfig;
 import io.smallrye.stork.impl.RoundRobinLoadBalancer;
 import io.smallrye.stork.impl.RoundRobinLoadBalancerProvider;
 import io.smallrye.stork.spi.config.ConfigProvider;
@@ -28,7 +27,7 @@ import io.smallrye.stork.spi.config.ConfigProvider;
 @SuppressWarnings("unchecked")
 public class StorkTest {
 
-    private static final ServiceDiscoveryConfig FAKE_SERVICE_DISCOVERY_CONFIG = new ServiceDiscoveryConfig() {
+    private static final ConfigWithType FAKE_SERVICE_DISCOVERY_CONFIG = new ConfigWithType() {
 
         @Override
         public String type() {
@@ -41,7 +40,7 @@ public class StorkTest {
         }
     };
 
-    private static final ServiceDiscoveryConfig FAKE_SECURE_SERVICE_DISCOVERY_CONFIG = new ServiceDiscoveryConfig() {
+    private static final ConfigWithType FAKE_SECURE_SERVICE_DISCOVERY_CONFIG = new ConfigWithType() {
 
         @Override
         public String type() {
@@ -54,7 +53,7 @@ public class StorkTest {
         }
     };
 
-    private static final ServiceDiscoveryConfig SERVICE_DISCOVERY_CONFIG_WITH_INVALID_PROVIDER = new ServiceDiscoveryConfig() {
+    private static final ConfigWithType SERVICE_DISCOVERY_CONFIG_WITH_INVALID_PROVIDER = new ConfigWithType() {
 
         @Override
         public String type() {
@@ -67,7 +66,7 @@ public class StorkTest {
         }
     };
 
-    private static final LoadBalancerConfig FAKE_LOAD_BALANCER_CONFIG = new LoadBalancerConfig() {
+    private static final ConfigWithType FAKE_LOAD_BALANCER_CONFIG = new ConfigWithType() {
 
         @Override
         public String type() {
@@ -80,7 +79,7 @@ public class StorkTest {
         }
     };
 
-    private static final LoadBalancerConfig LOAD_BALANCER_WITH_INVALID_PROVIDER = new LoadBalancerConfig() {
+    private static final ConfigWithType LOAD_BALANCER_WITH_INVALID_PROVIDER = new ConfigWithType() {
 
         @Override
         public String type() {
@@ -145,7 +144,7 @@ public class StorkTest {
 
     @Test
     public void testServiceWithoutServiceDiscoveryType() {
-        TestEnv.configurations.add(new FakeServiceConfig("a", new ServiceDiscoveryConfig() {
+        TestEnv.configurations.add(new FakeServiceConfig("a", new ConfigWithType() {
             @Override
             public String type() {
                 return null;
@@ -290,7 +289,7 @@ public class StorkTest {
         AnchoredServiceDiscoveryProvider.services.add(instance3);
 
         TestEnv.configurations.add(new FakeServiceConfig("a",
-                FAKE_SERVICE_DISCOVERY_CONFIG, new LoadBalancerConfig() {
+                FAKE_SERVICE_DISCOVERY_CONFIG, new ConfigWithType() {
                     @Override
                     public String type() {
                         return RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE;
@@ -346,10 +345,10 @@ public class StorkTest {
     private static class FakeServiceConfig implements ServiceConfig {
 
         private final String name;
-        private final LoadBalancerConfig lb;
-        private final ServiceDiscoveryConfig sd;
+        private final ConfigWithType lb;
+        private final ConfigWithType sd;
 
-        private FakeServiceConfig(String name, ServiceDiscoveryConfig sd, LoadBalancerConfig lb) {
+        private FakeServiceConfig(String name, ConfigWithType sd, ConfigWithType lb) {
             this.name = name;
             this.lb = lb;
             this.sd = sd;
@@ -361,12 +360,12 @@ public class StorkTest {
         }
 
         @Override
-        public LoadBalancerConfig loadBalancer() {
+        public ConfigWithType loadBalancer() {
             return lb;
         }
 
         @Override
-        public ServiceDiscoveryConfig serviceDiscovery() {
+        public ConfigWithType serviceDiscovery() {
             return sd;
         }
 
@@ -378,7 +377,7 @@ public class StorkTest {
 
     private static class FakeSecureServiceConfig extends FakeServiceConfig {
 
-        private FakeSecureServiceConfig(String name, ServiceDiscoveryConfig sd, LoadBalancerConfig lb) {
+        private FakeSecureServiceConfig(String name, ConfigWithType sd, ConfigWithType lb) {
             super(name, sd, lb);
         }
 

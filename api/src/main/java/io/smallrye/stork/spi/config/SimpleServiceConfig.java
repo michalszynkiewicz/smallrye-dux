@@ -3,9 +3,8 @@ package io.smallrye.stork.spi.config;
 import java.util.Collections;
 import java.util.Map;
 
-import io.smallrye.stork.api.config.LoadBalancerConfig;
+import io.smallrye.stork.api.config.ConfigWithType;
 import io.smallrye.stork.api.config.ServiceConfig;
-import io.smallrye.stork.api.config.ServiceDiscoveryConfig;
 
 /**
  * Implementation of {@link ServiceConfig} storing the service name, service discovery config and load balancer config.
@@ -15,15 +14,15 @@ public class SimpleServiceConfig implements ServiceConfig {
 
     private final String serviceName;
 
-    private final LoadBalancerConfig loadBalancerConfig;
-    private final ServiceDiscoveryConfig serviceDiscoveryConfig;
+    private final ConfigWithType loadBalancerConfig;
+    private final ConfigWithType ConfigWithType;
 
     private SimpleServiceConfig(String serviceName,
-            LoadBalancerConfig loadBalancerConfig,
-            ServiceDiscoveryConfig serviceDiscoveryConfig) {
+            ConfigWithType loadBalancerConfig,
+            ConfigWithType ConfigWithType) {
         this.serviceName = serviceName;
         this.loadBalancerConfig = loadBalancerConfig;
-        this.serviceDiscoveryConfig = serviceDiscoveryConfig;
+        this.ConfigWithType = ConfigWithType;
     }
 
     @Override
@@ -32,13 +31,13 @@ public class SimpleServiceConfig implements ServiceConfig {
     }
 
     @Override
-    public LoadBalancerConfig loadBalancer() {
+    public ConfigWithType loadBalancer() {
         return loadBalancerConfig;
     }
 
     @Override
-    public ServiceDiscoveryConfig serviceDiscovery() {
-        return serviceDiscoveryConfig;
+    public ConfigWithType serviceDiscovery() {
+        return ConfigWithType;
     }
 
     /**
@@ -46,8 +45,8 @@ public class SimpleServiceConfig implements ServiceConfig {
      */
     public static class Builder {
         String serviceName;
-        LoadBalancerConfig loadBalancerConfig;
-        ServiceDiscoveryConfig serviceDiscoveryConfig;
+        ConfigWithType loadBalancerConfig;
+        ConfigWithType ConfigWithType;
         boolean secure;
 
         /**
@@ -56,7 +55,7 @@ public class SimpleServiceConfig implements ServiceConfig {
          * @param loadBalancer the load balancer config
          * @return the current builder
          */
-        public Builder setLoadBalancer(LoadBalancerConfig loadBalancer) {
+        public Builder setLoadBalancer(ConfigWithType loadBalancer) {
             loadBalancerConfig = loadBalancer;
             return this;
         }
@@ -67,8 +66,8 @@ public class SimpleServiceConfig implements ServiceConfig {
          * @param serviceDiscovery the service discovery config
          * @return the current builder
          */
-        public Builder setServiceDiscovery(ServiceDiscoveryConfig serviceDiscovery) {
-            serviceDiscoveryConfig = serviceDiscovery;
+        public Builder setServiceDiscovery(ConfigWithType serviceDiscovery) {
+            ConfigWithType = serviceDiscovery;
             return this;
         }
 
@@ -100,15 +99,15 @@ public class SimpleServiceConfig implements ServiceConfig {
          * @return the built config
          */
         public SimpleServiceConfig build() {
-            return new SimpleServiceConfig(serviceName, loadBalancerConfig, serviceDiscoveryConfig);
+            return new SimpleServiceConfig(serviceName, loadBalancerConfig, ConfigWithType);
         }
     }
 
     /**
-     * An implementation of {@link LoadBalancerConfig} using an unmodifiable {@link Map} as backend to store
+     * An implementation of {@link ConfigWithType} using an unmodifiable {@link Map} as backend to store
      * the configuration.
      */
-    public static class SimpleLoadBalancerConfig implements LoadBalancerConfig {
+    public static class SimpleLoadBalancerConfig implements ConfigWithType {
 
         private final String type;
         private final Map<String, String> parameters;
@@ -136,20 +135,20 @@ public class SimpleServiceConfig implements ServiceConfig {
     }
 
     /**
-     * An implementation of {@link ServiceDiscoveryConfig} using an unmodifiable {@link Map} as backend to store
+     * An implementation of {@link ConfigWithType} using an unmodifiable {@link Map} as backend to store
      * the configuration.
      */
-    public static class SimpleServiceDiscoveryConfig implements ServiceDiscoveryConfig {
+    public static class SimpleConfigWithType implements ConfigWithType {
         private final String type;
         private final Map<String, String> parameters;
 
         /**
-         * Creates a new SimpleServiceDiscoveryConfig.
+         * Creates a new SimpleConfigWithType.
          *
          * @param type the type
          * @param parameters the configuration map
          */
-        public SimpleServiceDiscoveryConfig(String type, Map<String, String> parameters) {
+        public SimpleConfigWithType(String type, Map<String, String> parameters) {
             this.type = type;
             this.parameters = Collections.unmodifiableMap(parameters);
         }

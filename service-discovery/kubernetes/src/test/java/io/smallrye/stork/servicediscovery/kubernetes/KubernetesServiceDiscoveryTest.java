@@ -15,6 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import io.smallrye.stork.api.ServiceRegistrar;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,12 +67,17 @@ public class KubernetesServiceDiscoveryTest {
 
         AtomicReference<Integer> registered = new AtomicReference<>();
 
-        Service service = stork.getService(serviceName);
+        ServiceRegistrar<KubernetesMetadataKey> service = stork.getServiceRegistrar();
         //        service.getServiceDiscovery().registerServiceInstances(serviceName, ips)
         //                .onFailure().invoke(th -> fail("Failed to register service instances in Kubernetes", th))
         //                .subscribe();
 
-        await().untilAsserted(() -> service.getServiceDiscovery().registerServiceInstances(serviceName, ips));
+        for (String ip : ips) {
+            await().untilAsserted(() -> service.getServiceDiscovery().registerServiceInstance(serviceName, ip));
+        }
+
+        //        await().untilAsserted(() -> service.getServiceDiscovery().registerServiceInstances(serviceName, ip));
+        //        await().untilAsserted(() -> service.getServiceDiscovery().registerServiceInstances(serviceName, ip));
 
         //        Thread.sleep(10000);
 

@@ -15,12 +15,11 @@ import java.util.Map;
  * </p>
  * You can create new instances using the {@link #of(Class)}, {@link #of(Class, Map)} and {@link #with(Enum, Object)}methods.
  */
-public class Metadata<T extends Enum<T>> {
+public class Metadata<T extends Enum<T> & MetadataKey> {
 
     private final EnumMap<T, Object> metadata;
     private final Class<T> clazz;
-    private static final Metadata<? extends MetadataKey> EMPTY = new Metadata<>(DefaultMetadataKey.class,
-            Collections.emptyMap());
+    private static final Metadata EMPTY = new Metadata<>(NoMetadataKey.class, Collections.emptyMap());
 
     private Metadata(Class<T> key, Map<T, Object> metadata) {
         if (metadata.isEmpty()) {
@@ -32,12 +31,12 @@ public class Metadata<T extends Enum<T>> {
     }
 
     /**
-     * Returns an empty set of metadata.
+     * Returns an immutable, empty set of metadata.
      *
      * @return the empty instance
      */
-    public static Metadata<? extends MetadataKey> empty() {
-        return EMPTY;
+    public static <T extends Enum<T> & MetadataKey> Metadata<T> empty() {
+        return (Metadata<T>) EMPTY;
     }
 
     /**
@@ -119,4 +118,12 @@ public class Metadata<T extends Enum<T>> {
         }
     }
 
+    public enum NoMetadataKey implements MetadataKey {
+        ;
+
+        @Override
+        public String getName() {
+            return null;
+        }
+    }
 }

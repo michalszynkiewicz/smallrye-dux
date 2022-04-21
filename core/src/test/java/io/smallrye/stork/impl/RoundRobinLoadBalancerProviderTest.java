@@ -16,11 +16,11 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.api.LoadBalancer;
 import io.smallrye.stork.api.NoServiceInstanceFoundException;
 import io.smallrye.stork.api.ServiceInstance;
-import io.smallrye.stork.api.config.LoadBalancerConfig;
+import io.smallrye.stork.api.config.ConfigWithType;
 
 class RoundRobinLoadBalancerProviderTest {
 
-    public static final LoadBalancerConfig LB_CONFIG = new LoadBalancerConfig() {
+    public static final ConfigWithType LB_CONFIG = new ConfigWithType() {
         @Override
         public String type() {
             return RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE;

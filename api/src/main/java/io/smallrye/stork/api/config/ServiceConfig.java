@@ -16,14 +16,14 @@ public interface ServiceConfig {
      *
      * @return (optional) load balancer configuration
      */
-    LoadBalancerConfig loadBalancer();
+    ConfigWithType loadBalancer();
 
     /**
      * ServiceDiscovery configuration for the service
      * 
      * @return (required) service discovery configuration
      */
-    ServiceDiscoveryConfig serviceDiscovery();
+    ConfigWithType serviceDiscovery();
 
     /**
      * Whether the communication should use a secure connection (e.g. HTTPS)

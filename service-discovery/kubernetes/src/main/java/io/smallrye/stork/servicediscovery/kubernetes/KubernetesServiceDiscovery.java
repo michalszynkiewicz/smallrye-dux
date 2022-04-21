@@ -1,31 +1,25 @@
 package io.smallrye.stork.servicediscovery.kubernetes;
 
+import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesMetadataKey.META_K8S_NAMESPACE;
 import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesMetadataKey.META_K8S_SERVICE_ID;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.EndpointAddress;
-import io.fabric8.kubernetes.api.model.EndpointAddressBuilder;
 import io.fabric8.kubernetes.api.model.EndpointPort;
-import io.fabric8.kubernetes.api.model.EndpointPortBuilder;
 import io.fabric8.kubernetes.api.model.EndpointSubset;
-import io.fabric8.kubernetes.api.model.EndpointSubsetBuilder;
 import io.fabric8.kubernetes.api.model.Endpoints;
-import io.fabric8.kubernetes.api.model.EndpointsBuilder;
-import io.fabric8.kubernetes.api.model.ObjectReference;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -166,8 +160,11 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                                 : Collections.emptyMap());
                         Optional<Pod> maybePod = pods.stream().filter(pod -> pod.getMetadata().getName().equals(podName))
                                 .findFirst();
+                        String podNamespace = namespace;
                         if (maybePod.isPresent()) {
-                            Map<String, String> podLabels = maybePod.get().getMetadata().getLabels();
+                            ObjectMeta metadata = maybePod.get().getMetadata();
+                            podNamespace = metadata.getNamespace();
+                            Map<String, String> podLabels = metadata.getLabels();
                             for (Map.Entry<String, String> label : podLabels.entrySet()) {
                                 labels.putIfAbsent(label.getKey(), label.getValue());
                             }
@@ -175,7 +172,8 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                         //TODO add some useful metadata?
                         Metadata<KubernetesMetadataKey> k8sMetadata = Metadata.of(KubernetesMetadataKey.class);
                         serviceInstances.add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port, secure,
-                                labels, k8sMetadata.with(META_K8S_SERVICE_ID, hostname)));
+                                labels,
+                                k8sMetadata.with(META_K8S_SERVICE_ID, hostname).with(META_K8S_NAMESPACE, podNamespace)));
                     }
                 }
             }
@@ -186,66 +184,6 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
     private static boolean isSecure(KubernetesConfiguration config) {
         return config.getSecure() != null && Boolean.parseBoolean(config.getSecure());
-    }
-
-    @Override
-    public Uni<Void> registerServiceInstances(String serviceName, String... ipAdresses) {
-        return Uni.createFrom().emitter(em -> vertx.executeBlocking(future -> {
-            registerKubernetesService(serviceName, namespace, ipAdresses);
-            future.complete();
-        }, result -> {
-            if (result.succeeded()) {
-                LOGGER.error("Instances of service {} have been resgistered ", application);
-            } else {
-                LOGGER.error("Unable to register instances of service", application,
-                        result.cause());
-            }
-        }));
-    }
-
-    private void registerKubernetesService(String serviceName, String namespace,
-            String... ipAdresses) {
-
-        Map<String, String> serviceLabels = new HashMap<>();
-        serviceLabels.put("app.kubernetes.io/name", "svc");
-        serviceLabels.put("app.kubernetes.io/version", "1.0");
-
-        registerBackendPods(serviceName, namespace, serviceLabels, ipAdresses);
-
-        List<EndpointAddress> endpointAddresses = Arrays.stream(ipAdresses)
-                .map(ipAddress -> {
-                    ObjectReference targetRef = new ObjectReference(null, null, "Pod",
-                            serviceName + "-" + ipAsSuffix(ipAddress), namespace, null, UUID.randomUUID().toString());
-                    EndpointAddress endpointAddress = new EndpointAddressBuilder().withIp(ipAddress).withTargetRef(targetRef)
-                            .build();
-                    return endpointAddress;
-                }).collect(Collectors.toList());
-        Endpoints endpoint = new EndpointsBuilder()
-                .withNewMetadata().withName(serviceName).withLabels(serviceLabels).endMetadata()
-                .addToSubsets(new EndpointSubsetBuilder().withAddresses(endpointAddresses)
-                        .addToPorts(new EndpointPortBuilder().withPort(8080).build())
-                        .build())
-                .build();
-
-        client.endpoints().inNamespace(namespace).withName(serviceName).create(endpoint);
-
-    }
-
-    private void registerBackendPods(String name, String namespace, Map<String, String> labels, String[] ipAdresses) {
-
-        for (String ip : ipAdresses) {
-            Map<String, String> podLabels = new HashMap<>(labels);
-            podLabels.put("ui", "ui-" + ipAsSuffix(ip));
-            Pod backendPod = new PodBuilder().withNewMetadata().withName(name + "-" + ipAsSuffix(ip))
-                    .withLabels(podLabels)
-                    .endMetadata()
-                    .build();
-            client.pods().inNamespace(namespace).create(backendPod);
-        }
-    }
-
-    private String ipAsSuffix(String ipAddress) {
-        return ipAddress.replace(".", "");
     }
 
 }

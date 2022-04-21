@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import io.smallrye.stork.api.config.ConfigWithType;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
@@ -19,10 +20,9 @@ import io.smallrye.stork.api.LoadBalancer;
 import io.smallrye.stork.api.NoAcceptableServiceInstanceFoundException;
 import io.smallrye.stork.api.NoServiceInstanceFoundException;
 import io.smallrye.stork.api.ServiceInstance;
-import io.smallrye.stork.api.config.LoadBalancerConfig;
 
 class StickyLoadBalancerTest {
-    public static final LoadBalancerConfig DEFAULT_LB_CONFIG = new LoadBalancerConfig() {
+    public static final ConfigWithType DEFAULT_LB_CONFIG = new ConfigWithType() {
         @Override
         public String type() {
             return StickyLoadBalancerProvider.TYPE;
@@ -33,7 +33,7 @@ class StickyLoadBalancerTest {
             return Collections.emptyMap();
         }
     };
-    public static final LoadBalancerConfig WITH_FAILURE_BACKOFF_CONFIG = new LoadBalancerConfig() {
+    public static final ConfigWithType WITH_FAILURE_BACKOFF_CONFIG = new ConfigWithType() {
         @Override
         public String type() {
             return StickyLoadBalancerProvider.TYPE;

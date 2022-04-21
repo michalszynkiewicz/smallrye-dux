@@ -10,6 +10,7 @@ import javax.tools.StandardLocation;
 import io.smallrye.stork.api.config.Constants;
 import io.smallrye.stork.api.config.LoadBalancerAttribute;
 import io.smallrye.stork.api.config.ServiceDiscoveryAttribute;
+import io.smallrye.stork.api.config.ServiceRegistrarAttribute;
 
 public class DocWriter {
     private static final String STORK_DOCS_DIR = "META-INF/stork-docs/";
@@ -18,6 +19,22 @@ public class DocWriter {
 
     public DocWriter(ProcessingEnvironment environment) {
         this.environment = environment;
+    }
+
+    public void createAttributeTable(String serviceRegistrarType, ServiceRegistrarAttribute[] attributes) throws IOException {
+        String attributeTableFile = serviceRegistrarType + "-sr-attributes.txt";
+        FileObject loaderFile = createResourceFile(attributeTableFile);
+        try (PrintWriter out = new PrintWriter(loaderFile.openWriter())) {
+            out.println(" | Attribute            | Mandatory  | Default Value      | Description  |");
+            out.println(" |----------------------|------------|--------------------|--------------|");
+            for (ServiceRegistrarAttribute attribute : attributes) {
+                out.println(String.format("| `%s` | %s | %s | %s |",
+                        attribute.name(),
+                        attribute.required() ? "Yes" : "No",
+                        Constants.DEFAULT_VALUE.equals(attribute.defaultValue()) ? "" : '`' + attribute.defaultValue() + '`',
+                        attribute.description()));
+            }
+        }
     }
 
     public void createAttributeTable(String serviceDiscoveryType, ServiceDiscoveryAttribute[] attributes) throws IOException {

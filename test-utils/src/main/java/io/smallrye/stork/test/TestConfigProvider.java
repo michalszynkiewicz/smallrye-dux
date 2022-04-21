@@ -6,9 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import io.smallrye.stork.api.config.LoadBalancerConfig;
+import io.smallrye.stork.api.config.ConfigWithType;
 import io.smallrye.stork.api.config.ServiceConfig;
-import io.smallrye.stork.api.config.ServiceDiscoveryConfig;
 import io.smallrye.stork.spi.config.ConfigProvider;
 
 /**
@@ -45,8 +44,8 @@ public class TestConfigProvider implements ConfigProvider {
             }
 
             @Override
-            public LoadBalancerConfig loadBalancer() {
-                return loadBalancer == null ? null : new LoadBalancerConfig() {
+            public ConfigWithType loadBalancer() {
+                return loadBalancer == null ? null : new ConfigWithType() {
                     @Override
                     public String type() {
                         return loadBalancer;
@@ -60,8 +59,8 @@ public class TestConfigProvider implements ConfigProvider {
             }
 
             @Override
-            public ServiceDiscoveryConfig serviceDiscovery() {
-                return new ServiceDiscoveryConfig() {
+            public ConfigWithType serviceDiscovery() {
+                return new ConfigWithType() {
                     @Override
                     public String type() {
                         return serviceDiscovery;

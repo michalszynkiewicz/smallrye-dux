@@ -10,7 +10,11 @@ public enum KubernetesMetadataKey implements MetadataKey {
     /**
      * The key to access the kubernetes service id
      */
-    META_K8S_SERVICE_ID("k8s-service-id");
+    META_K8S_SERVICE_ID("k8s-service-id"),
+    /**
+     * The key to access the kubernates namespace
+     */
+    META_K8S_NAMESPACE("k8s-namespace");
 
     private final String name;
 

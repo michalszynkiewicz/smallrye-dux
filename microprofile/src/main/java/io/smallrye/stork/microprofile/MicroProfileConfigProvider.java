@@ -110,10 +110,10 @@ public class MicroProfileConfigProvider implements ConfigProvider {
                 serviceDiscoveryType = properties.get(SERVICE_DISCOVERY_EMBEDDED);
             }
             if (serviceDiscoveryType != null) {
-                SimpleServiceConfig.SimpleServiceDiscoveryConfig serviceDiscoveryConfig = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(
+                SimpleServiceConfig.SimpleConfigWithType ConfigWithType = new SimpleServiceConfig.SimpleConfigWithType(
                         serviceDiscoveryType, propertiesForPrefix(SERVICE_DISCOVERY, properties));
 
-                builder = builder.setServiceDiscovery(serviceDiscoveryConfig);
+                builder = builder.setServiceDiscovery(ConfigWithType);
             }
 
             serviceConfigs.add(builder.build());

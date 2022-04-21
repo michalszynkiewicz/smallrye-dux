@@ -2,7 +2,7 @@ package io.smallrye.stork.spi.internal;
 
 import io.smallrye.stork.api.LoadBalancer;
 import io.smallrye.stork.api.ServiceDiscovery;
-import io.smallrye.stork.api.config.LoadBalancerConfig;
+import io.smallrye.stork.api.config.ConfigWithType;
 import io.smallrye.stork.spi.ElementWithType;
 
 /**
@@ -16,5 +16,5 @@ public interface LoadBalancerLoader extends ElementWithType {
      * @param serviceDiscovery the service discovery used for that service
      * @return the load balancer
      */
-    LoadBalancer createLoadBalancer(LoadBalancerConfig config, ServiceDiscovery serviceDiscovery);
+    LoadBalancer createLoadBalancer(ConfigWithType config, ServiceDiscovery serviceDiscovery);
 }

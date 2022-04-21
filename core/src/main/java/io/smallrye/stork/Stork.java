@@ -129,12 +129,12 @@ public final class Stork implements StorkServiceRegistry {
     private Service createService(Map<String, LoadBalancerLoader> loadBalancerProviders,
             Map<String, ServiceDiscoveryLoader> serviceDiscoveryProviders,
             ServiceConfig serviceConfig) {
-        var serviceDiscoveryConfig = serviceConfig.serviceDiscovery();
-        if (serviceDiscoveryConfig == null) {
+        var ConfigWithType = serviceConfig.serviceDiscovery();
+        if (ConfigWithType == null) {
             throw new IllegalArgumentException(
                     "No service discovery defined for service " + serviceConfig.serviceName());
         }
-        String serviceDiscoveryType = serviceDiscoveryConfig.type();
+        String serviceDiscoveryType = ConfigWithType.type();
         if (serviceDiscoveryType == null) {
             throw new IllegalArgumentException(
                     "Service discovery type not defined for service " + serviceConfig.serviceName());
@@ -148,13 +148,13 @@ public final class Stork implements StorkServiceRegistry {
         if (serviceConfig.secure()) {
             // Backward compatibility
             LOGGER.warn("The 'secure' attribute is deprecated, use the 'secure' service discovery attribute instead");
-            // We do not know if we can add to the parameters, such create a new SimpleServiceDiscoveryConfig
-            Map<String, String> newConfig = new HashMap<>(serviceDiscoveryConfig.parameters());
+            // We do not know if we can add to the parameters, such create a new SimpleConfigWithType
+            Map<String, String> newConfig = new HashMap<>(ConfigWithType.parameters());
             newConfig.put("secure", "true");
-            serviceDiscoveryConfig = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(serviceDiscoveryType, newConfig);
+            ConfigWithType = new SimpleServiceConfig.SimpleConfigWithType(serviceDiscoveryType, newConfig);
         }
 
-        final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(serviceDiscoveryConfig,
+        final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(ConfigWithType,
                 serviceConfig.serviceName(), serviceConfig, infrastructure);
 
         final var loadBalancerConfig = serviceConfig.loadBalancer();

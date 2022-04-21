@@ -1,53 +1,52 @@
 package io.smallrye.stork.api;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
-import io.smallrye.stork.api.config.LoadBalancerConfig;
-import io.smallrye.stork.api.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.api.config.ConfigWithType;
 
 /**
  * Define a service that will be managed by Stork.
  */
 public class ServiceDefinition {
-    private final LoadBalancerConfig loadBalancer;
-    private final ServiceDiscoveryConfig serviceDiscovery;
+    private final ConfigWithType loadBalancer;
+    private final ConfigWithType serviceDiscovery;
 
-    private ServiceDefinition(ServiceDiscoveryConfig sd, LoadBalancerConfig lb) {
+    private ServiceDefinition(ConfigWithType sd, ConfigWithType lb) {
         serviceDiscovery = ParameterValidation.nonNull(sd, "service discovery config");
         loadBalancer = lb;
     }
 
     /**
-     * Creates a new {@link ServiceDefinition} using the given {@link ServiceDiscoveryConfig}.
+     * Creates a new {@link ServiceDefinition} using the given {@link ConfigWithType}.
      *
      * @param sd the service discovery config, must not be {@code null}
      * @return the created service definition
      */
-    public static ServiceDefinition of(ServiceDiscoveryConfig sd) {
+    public static ServiceDefinition of(ConfigWithType sd) {
         return of(sd, null);
     }
 
     /**
-     * Creates a new {@link ServiceDefinition} using the given {@link ServiceDiscoveryConfig} and {@link LoadBalancerConfig}.
+     * Creates a new {@link ServiceDefinition} using the given {@link ConfigWithType} and {@link ConfigWithType}.
      *
      * @param sd the service discovery config, must not be {@code null}
      * @param lb the load balancer config, if {@code null}, round-robin is used.
      * @return the created service definition
      */
-    public static ServiceDefinition of(ServiceDiscoveryConfig sd, LoadBalancerConfig lb) {
+    public static ServiceDefinition of(ConfigWithType sd, ConfigWithType lb) {
         return new ServiceDefinition(sd, lb);
     }
 
     /**
      * @return the configured load balancer config.
      */
-    public LoadBalancerConfig getLoadBalancer() {
+    public ConfigWithType getLoadBalancer() {
         return loadBalancer;
     }
 
     /**
      * @return the configured service discovery config.
      */
-    public ServiceDiscoveryConfig getServiceDiscovery() {
+    public ConfigWithType getServiceDiscovery() {
         return serviceDiscovery;
     }
 }

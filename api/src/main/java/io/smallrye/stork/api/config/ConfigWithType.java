@@ -6,7 +6,7 @@ import java.util.Map;
  * Load balancer configuration. Only used internally. The configuration is translated to an object
  * that provides parameters through getters
  */
-public interface LoadBalancerConfig {
+public interface ConfigWithType {
 
     /**
      * Load balancer type, e.g. "round-robin".
